@@ -10,8 +10,7 @@ import { HeroeModule } from './heroe/heroe.module';
     // Configuración de variables de entorno
     ConfigModule,
     ConfigModule.forRoot({
-      //envFilePath: `${process.cwd()}/environments/.env.${process.env.ENV}`,
-      envFilePath: `${process.cwd()}/environments/.env.development`,
+      envFilePath: `${process.cwd()}/environments/.env.${process.env.ENV.trim()}`,
       isGlobal: true,
     }),
 
