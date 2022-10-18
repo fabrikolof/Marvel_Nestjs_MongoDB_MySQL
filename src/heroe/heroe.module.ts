@@ -19,11 +19,12 @@ import {
   ComicSummary,
   ComicSummarySchema,
 } from './database/schemas/comicSummary.schema';
+import { ComicEntity } from './database/entities/comic.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([HeroeEntity]),
     HttpModule,
+    TypeOrmModule.forFeature([HeroeEntity, ComicEntity]),
     MongooseModule.forFeature([
       { name: Heroe.name, schema: HeroeSchema },
       { name: Comic.name, schema: ComicSchema },

@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -7,6 +8,7 @@ import {
   Put,
 } from '@nestjs/common';
 import HeroeMongo_Dto from '../dto/mongo_nosql_dto/Heroe_Dto_Mongo';
+import { CreateHeroeSQL_Dto } from '../dto/postgres_sql_dto/create_heroe_sql_dto';
 import { HeroeNoSQLService } from '../services/heroe-nosql.service';
 import { HeroeSQLService } from '../services/heroe-sql.service';
 import { MarvelHeroesService } from '../services/marvel-heroes.service';
@@ -21,6 +23,11 @@ export class HeroeController {
 
   // API Consumption with Axios
   // noSQL
+  // Heroe
+  @Delete('delete/nosql/:id')
+  deleteHeroeNoSQL(@Param('id') id: string) {
+    return this.heroeNoSQLService.delete(id);
+  }
   @Get('axios/:count/:page')
   async getAllHeroesWithAxios(
     @Param('count', ParseIntPipe) count: number,
@@ -33,12 +40,12 @@ export class HeroeController {
     return heroes;
   }
   @Get('comicsheroe/:id')
-  async getComicsByHeroeId(@Param('id', ParseIntPipe) id: number) {
+  async getComicsByHeroeId(@Param('id') id: string) {
     const comics = await this.marvelHeroeService.getComicsByHeroeIdAxios(id);
     return comics;
   }
   @Get('heroebyid/:id')
-  async getHeroeById(@Param('id', ParseIntPipe) id: number) {
+  async getHeroeById(@Param('id') id: string) {
     const heroe = await this.marvelHeroeService.getHeroeByIdAxios(id);
     return heroe;
   }
@@ -51,33 +58,31 @@ export class HeroeController {
   }
 
   @Post('guardar-heroe-nosql/:id')
-  async saveAxiosHeroeNoSQL(@Param('id', ParseIntPipe) id: number) {
+  async saveAxiosHeroeNoSQL(@Param('id') id: string) {
     const heroe_dto: HeroeMongo_Dto =
       await this.marvelHeroeService.getHeroeByIdAxios(id);
     return this.heroeNoSQLService.save(heroe_dto);
   }
 
-  @Post('sql/:id')
-  saveHeroeSQL(@Param('id') id: string) {
-    // const heroe = this.marvelHeroeService.getHeroe(id);
-    // transformar heroe en lo que requiero guardar
-    this.heroeSQLService.save();
-  }
-
-  @Put('nosql/:idHeroeExistente/:idNuevoHeroe')
-  updatedHeroeNoSQL(
-    @Param('idHeroeExistente') idHeroeExistente: string,
-    @Param('idNuevoHeroe') idNuevoHeroe: string,
+  @Put('nosql/:idHeroeExistenteMongo/:idNuevoHeroeAPIMarvel')
+  async updatedHeroeNoSQL(
+    @Param('idHeroeExistenteMongo') idHeroeExistenteMongo: string,
+    @Param('idNuevoHeroeAPIMarvel') idNuevoHeroeAPIMarvel: string,
   ) {
-    // const newHeroe = this.marvelHeroeService.getHeroe(idNuevoHeroe);
+    const newHeroe = await this.marvelHeroeService.getHeroeByIdAxios(
+      idNuevoHeroeAPIMarvel,
+    );
     // transformar el nuevo heroe para reemplazar los datos del heroe señalado
-    this.heroeNoSQLService.update();
+    return this.heroeNoSQLService.update(newHeroe, idHeroeExistenteMongo);
   }
-
-  @Put('nosql/:id')
-  deleteHeroeNoSQL(@Param('id') id: string) {
-    // buscar el heroe indicado en mi base de datos para poderlo borrar
-    this.heroeNoSQLService.delete(id);
+  @Post('sql/:id')//1011176
+  async saveHeroeSQL(@Param('id') id: string) {
+    console.log(id);
+    console.log(typeof id);
+    const heroeSQL = await this.marvelHeroeService.getHeroeByIdAxios(id);
+    // transformar heroe en lo que requiero guardar
+    //const heroe: HeroeEntity = this.fromDtoToHeroe(heroeDto);
+    return this.heroeSQLService.save(heroeSQL, +id);
   }
 
   // API Consumption with Fetch

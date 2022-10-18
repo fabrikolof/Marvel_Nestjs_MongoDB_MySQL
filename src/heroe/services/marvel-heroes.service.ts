@@ -10,7 +10,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Comic, ComicDocument } from '../database/schemas/comic.nosql.schema';
 
 import { Heroe } from '../database/schemas/heroe.nosql.schema';
-import { ComicSummary } from '../database/schemas/comicSummary.schema';
 import ComicSummaryDto from '../dto/mongo_nosql_dto/comicsummary_dto';
 import { HeroeNoSQLService } from './heroe-nosql.service';
 
@@ -28,7 +27,7 @@ export class MarvelHeroesService {
   getAllHeroesWithAxios(
     count: number,
     page: number,
-  ): Promise<HeroeMongo_Dto[]> {
+  ): Promise<any[]> {
     const privateKey = this.config.get<string>('PRIVATE_KEY');
     const ts = this.config.get<string>('TS');
     const publicKey = this.config.get<string>('PUBLIC_KEY');
@@ -55,7 +54,7 @@ export class MarvelHeroesService {
       ),
     );
   }
-  async getHeroeByIdAxios(heroeId: number): Promise<HeroeMongo_Dto> {
+  async getHeroeByIdAxios(heroeId: string): Promise<any> {
     const privateKey = this.config.get<string>('PRIVATE_KEY');
     const ts = this.config.get<string>('TS');
     const publicKey = this.config.get<string>('PUBLIC_KEY');
@@ -79,7 +78,7 @@ export class MarvelHeroesService {
       ),
     );
   }
-  async getComicsByHeroeIdAxios(heroeId: number): Promise<ObjectId[]> {
+  async getComicsByHeroeIdAxios(heroeId: string): Promise<ObjectId[]> {
     const privateKey = this.config.get<string>('PRIVATE_KEY');
     const ts = this.config.get<string>('TS');
     const publicKey = this.config.get<string>('PUBLIC_KEY');
@@ -102,7 +101,6 @@ export class MarvelHeroesService {
             return comicDto;
           });
           const resultSolved = await Promise.all(result);
-          console.log(resultSolved);
           const comicsCreados = await this.mongoService.saveComics(
             resultSolved,
           );
@@ -122,14 +120,13 @@ export class MarvelHeroesService {
     return lastValueFrom(
       this.httpService.get(uri).pipe(
         map(async (res) => {
-          const result = res.data.data.results.map((comic) => {
+          const result = await res.data.data.results.map((comic) => {
             const comicSummary = new ComicSummaryDto();
             comicSummary.resourceURI = comic.resourceURI;
             comicSummary.title = comic.title;
             return this.mongoService.saveComicSummary(comicSummary, comicId);
           });
-          const resultResolved = await result;
-          return resultResolved;
+          return result;
         }),
       ),
     );

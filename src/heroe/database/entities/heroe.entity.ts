@@ -1,12 +1,15 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ComicEntity } from './comic.entity';
 
 @Entity()
 export class HeroeEntity {
-  @PrimaryGeneratedColumn({
-    type: 'bigint',
-    name: 'heroe_id',
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({
+    unique: true,
   })
-  id: number;
+  id_heroe: number;
 
   @Column({
     nullable: false,
@@ -16,7 +19,6 @@ export class HeroeEntity {
 
   @Column({
     name: 'description',
-    nullable: false,
     default: '',
   })
   description: string;
@@ -25,11 +27,15 @@ export class HeroeEntity {
     nullable: false,
     default: '',
   })
-  thumbnail: string;
+  path: string;
 
   @Column({
     nullable: false,
     default: '',
   })
   extension: string;
+
+  @ManyToMany( () => ComicEntity, (comic) => comic.heroes )
+    @JoinTable( {name:"heroe_comic"} )
+  comics: ComicEntity[];
 }

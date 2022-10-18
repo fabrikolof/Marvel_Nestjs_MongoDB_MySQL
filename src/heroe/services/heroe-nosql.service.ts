@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection, Model } from 'mongoose';
+import { ComicSummaryInterface } from '../database/interaces/comicsummary.interface';
 import { HeroeInterface } from '../database/interaces/heroe.interface';
 import { Comic, ComicDocument } from '../database/schemas/comic.nosql.schema';
 import {
@@ -19,11 +20,11 @@ export class HeroeNoSQLService {
     @InjectModel(Heroe.name)
     private heroeModel: Model<HeroeInterface>,
     @InjectModel(Comic.name)
-    private comicModel: Model<ComicDocument>, //Todo interfaces
+    private comicModel: Model<ComicDocument>, //Todo interfaces error de tipo de dato
     @InjectModel(ComicSummary.name)
-    private comicSummaryModel: Model<ComicSummaryDocument>, //Todo interfaces
+    private comicSummaryModel: Model<ComicSummaryInterface>,
   ) {}
-  async getHeroebyId(id: number) {
+  async getHeroebyId(id: string) {
     const heroe = await this.heroeModel
       .findOne({ heroId: id })
       .populate('comics');
@@ -44,11 +45,15 @@ export class HeroeNoSQLService {
     return newHeroe.save();
   }
 
-  update() {
-    //encontrar al heroe
-    //si no lo encuentro tiro error
-    //si encuentro entonces lo modifico y lo vuelvo a guardar
-    throw new Error('No está implementado');
+  async update(mongoHeroe: HeroeMongo_Dto, idHeroeExistenteMongo: string) {
+    //findOneAndUpdate({id: id}, {comics: comicIds})
+    const heroe = await this.heroeModel.findOneAndUpdate(
+      {
+        idHeroeExistenteMongo,
+      },
+      { mongoHeroe },
+    );
+    return heroe;
   }
 
   async delete(heroeId: string) {
